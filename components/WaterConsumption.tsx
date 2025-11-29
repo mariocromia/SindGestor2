@@ -65,9 +65,9 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
     });
     const result: WaterReading[] = [];
     Object.values(groups).forEach(group => {
-       const sorted = group.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-       if (sorted.length > 0) sorted[0] = { ...sorted[0], previousReading: sorted[0].reading };
-       result.push(...sorted);
+      const sorted = group.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      if (sorted.length > 0) sorted[0] = { ...sorted[0], previousReading: sorted[0].reading };
+      result.push(...sorted);
     });
     return result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [readings]);
@@ -141,7 +141,7 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
         reading: Number(formData.reading)
       }, user.email);
       setLastUsedUnit(formData.unit);
-      
+
       // Auto prep next
       const enteredDate = new Date(`${formData.date}T12:00:00`);
       enteredDate.setDate(enteredDate.getDate() + 1);
@@ -190,7 +190,7 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
   return (
     <div className="space-y-6 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h2 className="text-2xl font-bold text-slate-800">Controle de Consumo de Água</h2>
+        <h2 className="text-lg md:text-2xl font-bold text-slate-800 pl-14 md:pl-0">Controle de Consumo de Água</h2>
         <div className="flex gap-2 flex-wrap">
           {canEdit && (
             <button
@@ -214,7 +214,7 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
             disabled={loadingAnalysis}
             className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
           >
-            {loadingAnalysis ? <Loader2 className="animate-spin" size={18}/> : <Sparkles size={18} />}
+            {loadingAnalysis ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
             Analisar IA
           </button>
         </div>
@@ -228,9 +228,9 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
               <h3 className="text-lg font-bold text-slate-800">Gerenciar Unidades</h3>
               <button onClick={() => setShowUnitModal(false)}><X size={20} /></button>
             </div>
-            
+
             <form onSubmit={handleAddUnit} className="mb-4 flex gap-2">
-              <input 
+              <input
                 type="text" value={newUnitName} onChange={(e) => setNewUnitName(e.target.value)}
                 className="flex-1 p-2 border rounded-lg" placeholder="Nova unidade..." required
               />
@@ -241,7 +241,7 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
               {units.map(u => (
                 <div key={u} className="flex justify-between items-center bg-slate-50 p-2 rounded mb-2">
                   <span>{u}</span>
-                  <button onClick={() => {setUnitToDelete(u); setShowUnitDeleteModal(true)}} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                  <button onClick={() => { setUnitToDelete(u); setShowUnitDeleteModal(true) }} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
                 </div>
               ))}
             </div>
@@ -251,14 +251,14 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
 
       {/* Delete Unit Confirmation */}
       {showUnitDeleteModal && (
-         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm border border-red-100">
-             <h3 className="text-lg font-bold text-red-600 mb-4">Excluir Unidade?</h3>
-             <p className="text-slate-600 mb-6">Confirma a exclusão de <b>{unitToDelete}</b>? Todo histórico será perdido.</p>
-             <div className="flex gap-3 justify-end">
-               <button onClick={() => setShowUnitDeleteModal(false)} className="px-4 py-2 border rounded-lg">Cancelar</button>
-               <button onClick={confirmDeleteUnit} className="px-4 py-2 bg-red-600 text-white rounded-lg">Excluir</button>
-             </div>
+            <h3 className="text-lg font-bold text-red-600 mb-4">Excluir Unidade?</h3>
+            <p className="text-slate-600 mb-6">Confirma a exclusão de <b>{unitToDelete}</b>? Todo histórico será perdido.</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowUnitDeleteModal(false)} className="px-4 py-2 border rounded-lg">Cancelar</button>
+              <button onClick={confirmDeleteUnit} className="px-4 py-2 bg-red-600 text-white rounded-lg">Excluir</button>
+            </div>
           </div>
         </div>
       )}
@@ -267,11 +267,11 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
-             <h3 className="text-lg font-bold text-red-600 mb-4">Excluir Leitura?</h3>
-             <div className="flex gap-3 justify-end">
-               <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 border rounded-lg">Cancelar</button>
-               <button onClick={confirmDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg">Excluir</button>
-             </div>
+            <h3 className="text-lg font-bold text-red-600 mb-4">Excluir Leitura?</h3>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 border rounded-lg">Cancelar</button>
+              <button onClick={confirmDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg">Excluir</button>
+            </div>
           </div>
         </div>
       )}
@@ -303,7 +303,7 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-[400px]">
           <h3 className="text-lg font-semibold mb-4 text-slate-700">Gráfico de Consumo (m³)</h3>
-          <ResponsiveContainer width="100%" height="90%"><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="date"/><YAxis/><Tooltip/><Legend/><Line type="monotone" dataKey="consumo" stroke="#3b82f6"/></LineChart></ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="90%"><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="date" /><YAxis /><Tooltip /><Legend /><Line type="monotone" dataKey="consumo" stroke="#3b82f6" /></LineChart></ResponsiveContainer>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[400px]">
@@ -317,14 +317,14 @@ export const WaterConsumption: React.FC<WaterConsumptionProps> = ({ user, curren
                 {tableData.map(r => (
                   <tr key={r.id} className="border-b hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium">{r.unit}</td>
-                    <td className="px-4 py-3">{new Date(r.date).toLocaleDateString()} <span className="text-xs text-slate-400">{new Date(r.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></td>
+                    <td className="px-4 py-3">{new Date(r.date).toLocaleDateString()} <span className="text-xs text-slate-400">{new Date(r.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td>
                     <td className="px-4 py-3">{r.reading}</td>
                     <td className="px-4 py-3 font-bold text-blue-600">{(r.reading - r.previousReading) > 0 ? (r.reading - r.previousReading).toFixed(2) : '0.00'}</td>
                     <td className="px-4 py-3 text-right">
                       {canEdit && (
                         <div className="flex justify-end gap-1">
-                          <button onClick={() => initiateEdit(r)} className="text-blue-500 p-1"><Pencil size={16}/></button>
-                          <button onClick={() => {setReadingToDelete(r.id); setShowDeleteModal(true)}} className="text-red-500 p-1"><Trash2 size={16}/></button>
+                          <button onClick={() => initiateEdit(r)} className="text-blue-500 p-1"><Pencil size={16} /></button>
+                          <button onClick={() => { setReadingToDelete(r.id); setShowDeleteModal(true) }} className="text-red-500 p-1"><Trash2 size={16} /></button>
                         </div>
                       )}
                     </td>

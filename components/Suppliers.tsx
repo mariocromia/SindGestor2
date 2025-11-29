@@ -18,7 +18,7 @@ export const Suppliers: React.FC<SuppliersProps> = ({ currentEnterpriseId, readO
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800">Prestadores de Serviço</h2>
+        <h2 className="text-lg md:text-2xl font-bold text-slate-800 pl-14 md:pl-0">Prestadores de Serviço</h2>
         {!readOnly && (
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
             + Novo Fornecedor

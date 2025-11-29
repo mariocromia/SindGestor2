@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Login } from './components/Login';
 import { WaterConsumption } from './components/WaterConsumption';
@@ -135,26 +136,27 @@ interface ProtectedRouteProps {
   requiredLevel?: PermissionLevel;
 }
 
-const ProtectedRoute: React.FC<React.PropsWithChildren<ProtectedRouteProps>> = ({ 
-  children, 
-  module, 
+const ProtectedRoute: React.FC<React.PropsWithChildren<ProtectedRouteProps>> = ({
+  children,
+  module,
   membership,
   requiredLevel = PermissionLevel.READ_ONLY
 }) => {
   if (!module) return <>{children}</>;
 
   const userLevel = membership.permissions[module] || PermissionLevel.NONE;
-  
+
   if (userLevel === PermissionLevel.NONE) {
     return <Navigate to="/" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [currentEnterpriseId, setCurrentEnterpriseId] = useState<string | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const currentMembership = user?.memberships.find(m => m.enterpriseId === currentEnterpriseId);
 
@@ -173,17 +175,27 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="flex bg-slate-100 min-h-screen font-sans">
-        <Sidebar 
-          user={user} 
+        <Sidebar
+          user={user}
           currentEnterpriseId={currentEnterpriseId}
           onSwitchEnterprise={setCurrentEnterpriseId}
-          onLogout={() => { setUser(null); setCurrentEnterpriseId(null); }} 
+          onLogout={() => { setUser(null); setCurrentEnterpriseId(null); }}
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
-        
-        <main className="flex-1 ml-64 p-8 overflow-y-auto">
+
+        <main className="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto">
+          {/* Mobile Hamburger Menu */}
+          <button
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="md:hidden fixed top-4 left-4 z-30 bg-slate-900 text-white p-3 rounded-lg shadow-lg hover:bg-slate-800 transition-colors"
+            aria-label="Abrir menu"
+          >
+            <Menu size={24} />
+          </button>
           <Routes>
             <Route path="/" element={<Dashboard currentEnterprise={currentMembership} migrationSql={MIGRATION_SQL} />} />
-            
+
             <Route path="/admin" element={
               <ProtectedRoute module={MODULES.ADMIN_PANEL} membership={currentMembership}>
                 <AdminPanel currentEnterprise={currentMembership} />
@@ -195,24 +207,24 @@ const App: React.FC = () => {
                 <WaterConsumption user={user} currentEnterpriseId={currentEnterpriseId} />
               </ProtectedRoute>
             } />
-            
+
             <Route path="/tasks" element={
               <ProtectedRoute module={MODULES.TASKS} membership={currentMembership}>
-                <TaskManager 
-                  userEmail={user.email} 
+                <TaskManager
+                  userEmail={user.email}
                   userName={user.name}
-                  userRole={currentMembership.role} 
-                  currentEnterpriseId={currentEnterpriseId} 
+                  userRole={currentMembership.role}
+                  currentEnterpriseId={currentEnterpriseId}
                   permissions={currentMembership.permissions}
                   memberships={user.memberships}
                 />
               </ProtectedRoute>
             } />
-            
+
             <Route path="/equipment" element={
               <ProtectedRoute module={MODULES.EQUIPMENT} membership={currentMembership}>
-                <EquipmentManager 
-                  currentEnterpriseId={currentEnterpriseId} 
+                <EquipmentManager
+                  currentEnterpriseId={currentEnterpriseId}
                   userEmail={user.email}
                   readOnly={currentMembership.permissions[MODULES.EQUIPMENT] === PermissionLevel.READ_ONLY}
                   permissionLevel={currentMembership.permissions[MODULES.EQUIPMENT] || PermissionLevel.NONE}
@@ -222,7 +234,7 @@ const App: React.FC = () => {
 
             <Route path="/structural" element={
               <ProtectedRoute module={MODULES.STRUCTURAL} membership={currentMembership}>
-                <Structural 
+                <Structural
                   currentEnterpriseId={currentEnterpriseId}
                   userEmail={user.email}
                   permissionLevel={currentMembership.permissions[MODULES.STRUCTURAL] || PermissionLevel.NONE}
@@ -232,17 +244,17 @@ const App: React.FC = () => {
 
             <Route path="/suppliers" element={
               <ProtectedRoute module={MODULES.SUPPLIERS} membership={currentMembership}>
-                <Suppliers 
-                  currentEnterpriseId={currentEnterpriseId} 
+                <Suppliers
+                  currentEnterpriseId={currentEnterpriseId}
                   readOnly={currentMembership.permissions[MODULES.SUPPLIERS] === PermissionLevel.READ_ONLY}
                 />
               </ProtectedRoute>
             } />
-            
+
             <Route path="/documents" element={
               <ProtectedRoute module={MODULES.DOCUMENTS} membership={currentMembership}>
-                <Documents 
-                  currentEnterpriseId={currentEnterpriseId} 
+                <Documents
+                  currentEnterpriseId={currentEnterpriseId}
                   permissionLevel={currentMembership.permissions[MODULES.DOCUMENTS] || PermissionLevel.NONE}
                   userEmail={user.email}
                 />
