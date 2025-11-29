@@ -1,0 +1,8 @@
+{
+  "name": "SindGestor",
+  "description": "Sistema inteligente de gestão de condomínios com controle de acesso, manutenção via QR Code, monitoramento de recursos e assistente AI integrado.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
