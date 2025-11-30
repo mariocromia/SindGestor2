@@ -9,6 +9,7 @@ interface EquipmentManagerProps {
   userEmail: string;
   readOnly: boolean;
   permissionLevel: PermissionLevel;
+  initialEquipmentId?: string;
 }
 
 // Internal Component for Signature
@@ -125,7 +126,7 @@ const SignaturePad: React.FC<{
   );
 };
 
-export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnterpriseId, userEmail, readOnly, permissionLevel }) => {
+export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnterpriseId, userEmail, readOnly, permissionLevel, initialEquipmentId }) => {
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [selectedEq, setSelectedEq] = useState<Equipment | null>(null);
   const [logs, setLogs] = useState<MaintenanceLog[]>([]);
@@ -187,6 +188,8 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
   const canWrite = permissionLevel === PermissionLevel.READ_WRITE || permissionLevel === PermissionLevel.FULL_ACCESS;
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const detectorRef = useRef<any>(null);
+  const rafRef = useRef<number | null>(null);
 
   const fetchData = async () => {
     setEquipmentList(await db.getEquipment(currentEnterpriseId));
@@ -195,6 +198,13 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
   };
 
   useEffect(() => { fetchData(); }, [currentEnterpriseId]);
+
+  useEffect(() => {
+    if (initialEquipmentId && equipmentList.length > 0) {
+      const eq = equipmentList.find(e => e.id === initialEquipmentId);
+      if (eq) setSelectedEq(eq);
+    }
+  }, [initialEquipmentId, equipmentList]);
 
   useEffect(() => {
     if (selectedEq) {
@@ -207,6 +217,9 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
   useEffect(() => {
     let stream: MediaStream | null = null;
     if (showScanner && canScan) {
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        alert('Para usar a câmera, acesse via HTTPS.');
+      }
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
         .then(s => {
           stream = s;
@@ -214,11 +227,38 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
             videoRef.current.srcObject = stream;
             videoRef.current.play();
           }
+          const BD = (window as any).BarcodeDetector;
+          if (BD) {
+            try {
+              detectorRef.current = new BD({ formats: ['qr_code'] });
+            } catch {}
+            const scan = async () => {
+              if (!detectorRef.current || !videoRef.current) {
+                rafRef.current = requestAnimationFrame(scan);
+                return;
+              }
+              try {
+                const codes: any[] = await detectorRef.current.detect(videoRef.current);
+                if (codes && codes.length > 0) {
+                  const raw = (codes[0] as any).rawValue || '';
+                  const id = parseEquipmentId(raw);
+                  if (id) {
+                    simulateScan(id);
+                    return;
+                  }
+                }
+              } catch {}
+              rafRef.current = requestAnimationFrame(scan);
+            };
+            scan();
+          }
         })
         .catch(err => alert("Erro ao acessar câmera: " + err));
     }
     return () => {
       if (stream) stream.getTracks().forEach(track => track.stop());
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      detectorRef.current = null;
     };
   }, [showScanner]);
 
@@ -340,7 +380,8 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
   };
 
   const handlePrintLabel = (eq: Equipment) => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=app://equipment/${eq.id}`;
+    const appUrl = `${location.origin}${location.pathname}#/equipment/${eq.id}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(appUrl)}`;
     const printWindow = window.open('', '_blank', 'width=400,height=400');
 
     if (printWindow) {
@@ -451,6 +492,13 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
     } else {
       alert("Equipamento não encontrado.");
     }
+  };
+
+  const parseEquipmentId = (text: string): string => {
+    const prefix = 'app://equipment/';
+    if (text && text.startsWith(prefix)) return text.slice(prefix.length);
+    const match = text.match(/[0-9a-fA-F-]{36}/);
+    return match ? match[0] : '';
   };
 
   // Filter Logic
@@ -772,16 +820,8 @@ export const EquipmentManager: React.FC<EquipmentManagerProps> = ({ currentEnter
             <video ref={videoRef} className="w-full h-full object-cover"></video>
             <div className="qr-scanner-overlay"></div>
             <button onClick={() => setShowScanner(false)} className="absolute top-4 right-4 bg-white/20 p-2 rounded-full text-white"><X size={24} /></button>
-            <div className="absolute bottom-10 left-0 right-0 flex justify-center flex-col items-center gap-4">
+            <div className="absolute bottom-10 left-0 right-0 flex justify-center">
               <p className="text-white bg-black/50 px-3 py-1 rounded text-sm">Aponte para o QR Code</p>
-              {/* Simulation for Demo */}
-              <div className="bg-white p-2 rounded-lg shadow-lg flex flex-col gap-2 w-64">
-                <p className="text-xs font-bold text-center text-slate-500">SIMULAÇÃO DE LEITURA</p>
-                <select onChange={(e) => { if (e.target.value) simulateScan(e.target.value); }} className="text-sm p-2 border rounded">
-                  <option value="">Simular Leitura...</option>
-                  {equipmentList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-                </select>
-              </div>
             </div>
           </div>
         </div>

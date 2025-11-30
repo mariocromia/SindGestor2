@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Login } from './components/Login';
@@ -232,6 +232,17 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } />
 
+            <Route path="/equipment/:id" element={
+              <ProtectedRoute module={MODULES.EQUIPMENT} membership={currentMembership}>
+                <EquipmentWrapper
+                  currentEnterpriseId={currentEnterpriseId}
+                  userEmail={user.email}
+                  readOnly={currentMembership.permissions[MODULES.EQUIPMENT] === PermissionLevel.READ_ONLY}
+                  permissionLevel={currentMembership.permissions[MODULES.EQUIPMENT] || PermissionLevel.NONE}
+                />
+              </ProtectedRoute>
+            } />
+
             <Route path="/structural" element={
               <ProtectedRoute module={MODULES.STRUCTURAL} membership={currentMembership}>
                 <Structural
@@ -266,6 +277,24 @@ const App: React.FC = () => {
         </main>
       </div>
     </Router>
+  );
+};
+
+const EquipmentWrapper: React.FC<{
+  currentEnterpriseId: string;
+  userEmail: string;
+  readOnly: boolean;
+  permissionLevel: PermissionLevel;
+}> = ({ currentEnterpriseId, userEmail, readOnly, permissionLevel }) => {
+  const { id } = useParams();
+  return (
+    <EquipmentManager
+      currentEnterpriseId={currentEnterpriseId}
+      userEmail={userEmail}
+      readOnly={readOnly}
+      permissionLevel={permissionLevel}
+      initialEquipmentId={id}
+    />
   );
 };
 
