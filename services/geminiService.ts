@@ -1,6 +1,20 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getApiKey = (): string | null => {
+  try {
+    // Vite: use import.meta.env and allow fallback
+    const key = (import.meta as any)?.env?.VITE_GOOGLE_API_KEY || (window as any)?.VITE_GOOGLE_API_KEY || null;
+    return typeof key === 'string' && key.trim().length > 0 ? key : null;
+  } catch {
+    return null;
+  }
+};
+
+const getClient = (): GoogleGenAI | null => {
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
 export const geminiService = {
   /**
@@ -19,7 +33,11 @@ export const geminiService = {
         Saída desejada: Lista com 5 a 7 itens essenciais para verificar, formatada em Markdown.
       `;
 
-      const response = await ai.models.generateContent({
+      const client = getClient();
+      if (!client) {
+        return "Função de IA indisponível: configure a variável VITE_GOOGLE_API_KEY.";
+      }
+      const response = await client.models.generateContent({
         model,
         contents: prompt,
       });
@@ -50,7 +68,11 @@ export const geminiService = {
         Responda em português, tom profissional e conciso.
       `;
 
-      const response = await ai.models.generateContent({
+      const client = getClient();
+      if (!client) {
+        return "Análise de IA indisponível: configure VITE_GOOGLE_API_KEY.";
+      }
+      const response = await client.models.generateContent({
         model,
         contents: prompt,
       });

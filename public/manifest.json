@@ -2,7 +2,7 @@
     "name": "SindGestor - Sistema de Gestão Sindical",
     "short_name": "SindGestor",
     "description": "Sistema completo de gestão para sindicatos e associações",
-    "start_url": "/",
+    "start_url": "./",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#1e40af",

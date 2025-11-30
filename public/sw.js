@@ -1,12 +1,10 @@
 const CACHE_NAME = 'sindgestor-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/index.tsx',
-  '/App.tsx',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png'
 ];
 
 // Install service worker and cache assets
@@ -97,7 +95,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             // Return offline fallback if available
-            return caches.match('/index.html');
+            return caches.match('./index.html');
           });
       })
   );
